@@ -57,7 +57,7 @@ export default function Home() {
   return (
     <main>
       <div>
-        <h1> Telemetry Dashboard </h1>
+        <h1>Overpass</h1>
         <select value={metric} onChange={(e) => setMetric(e.target.value)}>
           <option value="temp">Temperature</option>
           <option value="bus_voltage">Bus Voltage</option>

@@ -1,5 +1,5 @@
 -- Apply once per database, from the project root (not inside the Next app):
---   psql ground_telemetry -f schema.sql
+--   psql overpass -f schema.sql
 
 CREATE TABLE IF NOT EXISTS telemetry (
   time timestamptz,
