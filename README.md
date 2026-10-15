@@ -7,11 +7,59 @@ Pass-gated satellite fleet console: telemetry and commands only while a satellit
 ## Stack
 
 - Next.js (App Router, TypeScript)
-- PostgreSQL 16 (Homebrew **or** Compose service `db`)
+- PostgreSQL 16 (Compose service `db`; Homebrew still optional for host-only runs)
 - Node simulator (`scripts/simulate.ts`) — on the host, not inside Compose
-- Optional: Docker Compose (`Dockerfile` + `docker-compose.yml`)
+- Docker Compose: **dev** (live reload) by default; **prod** image via `docker-compose.prod.yml`
 
-## Setup (current slice)
+## Setup (Docker — recommended)
+
+Compose starts Postgres + the Next.js app with a bind mount so edits on your Mac reload in the container (`next dev`). Browser and simulator use **http://localhost:3000**.
+
+Homebrew Postgres and Compose both want port **5432**. Stop Homebrew first if it is running. Free port **3000** if something else is using it.
+
+```bash
+brew services stop postgresql@16   # if needed
+docker compose up --build
+```
+
+Open [http://localhost:3000](http://localhost:3000). After changing `package.json` / lockfile, reinstall inside the app container:
+
+```bash
+docker compose exec app npm ci
+```
+
+If you had an older Compose volume created as `ground_telemetry`, reset once:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+`schema.sql` runs **once**, when the `pgdata` volume is first created.
+
+**Production-style image** (no bind mount; rebuild to pick up code changes):
+
+```bash
+docker compose -f docker-compose.prod.yml up --build
+```
+
+Stop:
+
+```bash
+docker compose down
+```
+
+### Simulator (host)
+
+App must already be running (Compose or otherwise):
+
+```bash
+npx tsx scripts/simulate.ts
+```
+
+Posts 3 metrics (`temp`, `bus_voltage`, `cabin_pressure`) at 1 Hz to `/api/ingest`. Ctrl+C to stop. Needs Node on the host (or run the same command via `docker compose exec app …` if you prefer).
+
+## Setup (host-only, optional)
 
 **1. Install and start Postgres** (Homebrew on macOS):
 
@@ -47,39 +95,6 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
-
-**5. Simulator** (second terminal; app must already be running):
-
-```bash
-npx tsx scripts/simulate.ts
-```
-
-Posts 3 metrics (`temp`, `bus_voltage`, `cabin_pressure`) at 1 Hz to `/api/ingest`. Ctrl+C to stop.
-
-## Run with Docker (optional)
-
-Compose starts `db` + `app`. Browser and simulator still use **http://localhost:3000**.
-
-Homebrew Postgres and Compose both want port **5432**. Stop Homebrew first. Stop `npm run dev` so port **3000** is free.
-
-```bash
-brew services stop postgresql@16
-docker compose up --build
-```
-
-If you had an older Compose volume created as `ground_telemetry`, reset once:
-
-```bash
-docker compose down -v
-docker compose up --build
-```
-
-`schema.sql` runs **once**, when the `pgdata` volume is first created.
-
-```bash
-docker compose down
-brew services start postgresql@16
-```
 
 ## API (current slice)
 

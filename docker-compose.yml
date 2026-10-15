@@ -17,14 +17,22 @@ services:
       retries: 10
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
     environment:
       DATABASE_URL: postgresql://telemetry:telemetry@db:5432/overpass
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   pgdata:
+  app_node_modules:
