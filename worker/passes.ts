@@ -1,5 +1,9 @@
+import { filterValidPasses, type Pass } from "../lib/passValidation";
+
+const PASSES_URL = "http://localhost:3000/api/passes";
+
 /** Mock passes until Celestrak + orbit math land. Shape matches SPEC pass fields. */
-const MOCK_PASSES = [
+const MOCK_PASSES: Pass[] = [
     {
         sat: "sat-1",
         station: "los-angeles",
@@ -18,7 +22,7 @@ const MOCK_PASSES = [
     },
 ];
 
-let passes = MOCK_PASSES;
+let passes: Pass[] = [];
 
 export function getPasses() {
     return passes;
@@ -27,6 +31,25 @@ export function getPasses() {
 export function refreshPasses() {
     // TODO: fetch TLEs from Celestrak, compute AOS/LOS, write passes
     console.log("calls api (mock)");
-    passes = MOCK_PASSES;
-    console.log("passes", passes);
+
+    const valid = filterValidPasses(MOCK_PASSES);
+
+    fetch(PASSES_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ passes: valid }),
+    })
+        .then(async (res) => {
+            const body = await res.json();
+            console.log(res.status, body);
+            if (!res.ok) {
+                console.error("passes ingest rejected; in-memory unchanged");
+                return;
+            }
+            passes = valid;
+            console.log("passes", passes);
+        })
+        .catch((err) => {
+            console.error("passes ingest failed; in-memory unchanged", err);
+        });
 }
