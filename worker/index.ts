@@ -1,26 +1,15 @@
-const INGEST_URL = "http://localhost:3000/api/ingest";
+import { radio } from "./radio";
 
-function tick() {
-    const time = new Date().toISOString();
-    const points = [
-        { time, vehicle_id: "sat-1", metric: "temp", value: 22 + (Math.random() - 0.5) },
-        { time, vehicle_id: "sat-1", metric: "bus_voltage", value: 28 + (Math.random() - 0.5) },
-        { time, vehicle_id: "sat-1", metric: "cabin_pressure", value: 14.7 + (Math.random() - 0.5) * 0.5 },
-    ];
+const PASS_REFRESH_MS = 45 * 60 * 1000; // 45 minutes
+const RADIO_MS = 1000;
 
-    fetch(INGEST_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify( { points } ),
-    })
-    .then(async (res) => {
-        const body = await res.json();
-        console.log(res.status, body);
-    })
-    .catch((err) => {
-        console.error("ingest failed", err);
-    });
+function refreshPasses() {
+    console.log("calls api");
+    console.log("passes");
 }
 
-tick();
-setInterval(tick, 1000);
+refreshPasses();
+setInterval(refreshPasses, PASS_REFRESH_MS);
+
+radio();
+setInterval(radio, RADIO_MS);
