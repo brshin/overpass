@@ -18,8 +18,15 @@ const MOCK_PASSES = [
     },
 ];
 
+let passes = MOCK_PASSES;
+
+export function getPasses() {
+    return passes;
+}
+
 export function refreshPasses() {
     // TODO: fetch TLEs from Celestrak, compute AOS/LOS, write passes
     console.log("calls api (mock)");
-    console.log("passes", MOCK_PASSES);
+    passes = MOCK_PASSES;
+    console.log("passes", passes);
 }
