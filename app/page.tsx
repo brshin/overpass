@@ -29,7 +29,7 @@ export default function Home() {
       const toStr = to.toISOString();
 
       try {
-        const res = await fetch(`/api/telemetry?vehicle=sat-1&metric=${metric}&from=${fromStr}&to=${toStr}`);
+        const res = await fetch(`/api/telemetry?vehicle=${encodeURIComponent("ISS (ZARYA)")}&metric=${metric}&from=${fromStr}&to=${toStr}`);
         if (!res.ok) {
           setError(true);
           return;
