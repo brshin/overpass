@@ -16,21 +16,23 @@ export type OrbitElement = {
 export type PassGeometry = {
     aos: string;
     los: string;
-    max_elevation: number | "TBD";
+    max_elevation: number;
 };
 
 /**
  * Predict contact window + peak elevation from orbit elements + station.
- * TODO: SGP4 propagate over a horizon and find AOS/LOS / max elev.
+ * TODO: replace mock window with SGP4 + elevation sweep.
  */
 export function computeAosLosMaxElevation(
     _element: OrbitElement,
     _station: typeof LOS_ANGELES
 ): PassGeometry {
+    const now = Date.now();
+    // Mock: in view for the next 5 minutes so radio/pipeline can be exercised.
     return {
-        aos: "TBD",
-        los: "TBD",
-        max_elevation: "TBD",
+        aos: new Date(now - 60_000).toISOString(),
+        los: new Date(now + 5 * 60_000).toISOString(),
+        max_elevation: 42.5,
     };
 }
 
@@ -40,10 +42,6 @@ export function statusFromWindow(
     los: string,
     nowMs: number = Date.now()
 ): "upcoming" | "active" | "ended" | "TBD" {
-    if (aos === "TBD" || los === "TBD") {
-        return "TBD";
-    }
-
     const aosMs = Date.parse(aos);
     const losMs = Date.parse(los);
     if (Number.isNaN(aosMs) || Number.isNaN(losMs)) {

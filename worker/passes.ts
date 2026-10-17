@@ -10,26 +10,6 @@ const PASSES_URL = "http://localhost:3000/api/passes";
 const ISS_GP_URL =
     "https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=JSON";
 
-/** Mock passes until Celestrak + orbit math land. Shape matches SPEC pass fields. */
-const MOCK_PASSES: Pass[] = [
-    {
-        sat: "sat-1",
-        station: "los-angeles",
-        aos: "2026-10-16T00:01:00.000Z",
-        los: "2026-10-16T00:05:00.000Z",
-        max_elevation: 42.5,
-        status: "upcoming",
-    },
-    {
-        sat: "sat-1",
-        station: "los-angeles",
-        aos: "2026-10-16T01:40:00.000Z",
-        los: "2026-10-16T01:48:00.000Z",
-        max_elevation: 18.2,
-        status: "upcoming",
-    },
-];
-
 let passes: Pass[] = [];
 
 export function getPasses() {
@@ -38,6 +18,8 @@ export function getPasses() {
 
 export async function refreshPasses() {
     console.log("calls api");
+
+    const unfiltered_passes: unknown[] = [];
 
     try {
         const res = await fetch(ISS_GP_URL);
@@ -62,6 +44,8 @@ export async function refreshPasses() {
                 status,
             };
 
+            unfiltered_passes.push(iss_pass);
+
             console.log("iss", iss);
             console.log("iss_pass", iss_pass);
         }
@@ -69,8 +53,7 @@ export async function refreshPasses() {
         console.error("celestrak fetch failed", err);
     }
 
-    // Still publish mock windows until orbit → AOS/LOS math exists (TBD fields won't validate).
-    const valid = filterValidPasses(MOCK_PASSES);
+    const valid = filterValidPasses(unfiltered_passes);
 
     try {
         const res = await fetch(PASSES_URL, {
