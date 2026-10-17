@@ -11,11 +11,15 @@ CREATE TABLE IF NOT EXISTS telemetry (
 CREATE INDEX IF NOT EXISTS telemetry_vehicle_metric_time
   ON telemetry (vehicle_id, metric, time);
 
+-- One published "next/current" window per sat+station for now.
+-- UNIQUE (sat, station) so AOS/LOS jitter on refresh updates the same row.
+-- When storing many upcoming passes per sat, revisit this key.
 CREATE TABLE IF NOT EXISTS passes (
   sat text,
   station text,
   aos timestamptz,
   los timestamptz,
   max_elevation double precision,
-  status text
+  status text,
+  UNIQUE (sat, station)
 );
